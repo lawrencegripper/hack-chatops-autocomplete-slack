@@ -5,28 +5,32 @@ const Options = () => {
   const [color, setColor] = useState<string>();
   const [status, setStatus] = useState<string>();
   const [like, setLike] = useState<boolean>();
+  const [chatopsHelp, setChatopsHelp] = useState<string>();
 
   useEffect(() => {
     // Restores select box and checkbox state using the preferences
     // stored in chrome.storage.
-    chrome.storage.sync.get(
+    chrome.storage.local.get(
       {
         favoriteColor: "red",
         likesColor: true,
+        chatopsHelp: ""
       },
       (items) => {
         setColor(items.favoriteColor);
         setLike(items.likesColor);
+        setChatopsHelp(items.chatopsHelp);
       }
     );
   }, []);
 
   const saveOptions = () => {
-    // Saves options to chrome.storage.sync.
-    chrome.storage.sync.set(
+    // Saves options to chrome.storage.local.
+    chrome.storage.local.set(
       {
         favoriteColor: color,
         likesColor: like,
+        chatopsHelp: chatopsHelp
       },
       () => {
         // Update status to let user know options were saved.
@@ -61,6 +65,12 @@ const Options = () => {
             onChange={(event) => setLike(event.target.checked)}
           />
           I like colors.
+        </label>
+      </div>
+      <div>
+        <label>
+          <textarea value={chatopsHelp} onChange={(e) => setChatopsHelp(e.target.value)}></textarea>
+          Chatops help output
         </label>
       </div>
       <div>{status}</div>

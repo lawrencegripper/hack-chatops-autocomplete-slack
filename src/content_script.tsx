@@ -10,8 +10,8 @@
 //   runSlackAutocompletion()
 // });
 
-const getEditorElement = () : HTMLDivElement => document.querySelector("div.p-message_pane_input div[contenteditable=true]") as HTMLDivElement
-const waitForEditor = () : Promise<HTMLDivElement> => {
+const getEditorElement = (): HTMLDivElement => document.querySelector("div.p-message_pane_input div[contenteditable=true]") as HTMLDivElement
+const waitForEditor = (): Promise<HTMLDivElement> => {
   return new Promise((resolve) => {
     const tryAndGetElement = () => {
       const element = getEditorElement()
@@ -32,11 +32,64 @@ const runSlackAutocompletion = async () => {
     console.log("No input panel found for slack skipping")
     return
   }
+  // Get the configured help
+  let chatopsHelp: string = ""
+  chrome.storage.local.get('chatopsHelp', (items) => {
+    chatopsHelp = items.chatopsHelp;
+    console.log("data loaded")
+  })
   editorElement.addEventListener("input", (e) => {
-    console.log('edit made to page')
-    console.log(editorElement.innerText)
+    console.log('user input on page')
+    let currentText = editorElement.innerText
+    // Skip any non chatops commands
+    if (!currentText.startsWith('.')) {
+      return
+    }
+    console.log('user typed ' + currentText)
+    // Find lines that match
+    let matches = []
+    for (let line of chatopsHelp.split(/\r?\n/)) {
+      if (line.startsWith(currentText)) {
+        matches.push(line)
+      }
+    }
+    // how many matches did we find?
+    let matchesCount = matches.length
+    console.log(matchesCount + " matches found")
+
+    // Display lines that match
+    let dispalyElement: HTMLDivElement | null = document.querySelector("div.lg-chatopshelp-suggestions")
+    if (dispalyElement === null) {
+      dispalyElement = createDisplayElement(dispalyElement)
+    } else {
+      dispalyElement.innerHTML = ""
+    }
+
+    for (let line in matches) {
+      let li = document.createElement("li")
+      li.innerText = matches[line]
+      dispalyElement.appendChild(li)
+    }
   })
 }
 
 console.log('content script loaded')
 runSlackAutocompletion()
+
+function createDisplayElement(dispalyElement: HTMLDivElement | null) {
+  dispalyElement = document.createElement("div")
+  dispalyElement.className = "lg-chatopshelp-suggestions"
+  // move element to top right
+  dispalyElement.style.position = "absolute"
+  dispalyElement.style.right = "0"
+  dispalyElement.style.top = "0"
+  dispalyElement.style.zIndex = "9999"
+  dispalyElement.style.width = "300px"
+  dispalyElement.style.height = "300px"
+  dispalyElement.style.backgroundColor = "grey"
+  dispalyElement.style.border = "1px solid black"
+  dispalyElement.style.overflow = "hidden"
+  dispalyElement.style.padding = "5px"
+  document.body.appendChild(dispalyElement)
+  return dispalyElement
+}
