@@ -2,6 +2,8 @@
 
 This extension provides autocompletion style tips when using chatops. You provide it with a `help` document showing which commands are supported, for example the `.help` output from [`hubot`](https://hubot.github.com/).
 
+This is very much a quick hack to play around with the concept.
+
 Thanks to [Chrome Extension, TypeScript and Visual Studio Code](https://github.com/chibat/chrome-extension-typescript-starter) for the starting point.
 
 ## Prerequisites

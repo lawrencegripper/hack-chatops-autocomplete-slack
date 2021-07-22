@@ -41,8 +41,12 @@ const runSlackAutocompletion = async () => {
   editorElement.addEventListener("input", (e) => {
     console.log('user input on page')
     let currentText = editorElement.innerText
+    let dispalyElement: HTMLDivElement | null = document.querySelector("div.lg-chatopshelp-suggestions")
     // Skip any non chatops commands
-    if (!currentText.startsWith('.')) {
+    if (currentText.length < 2 || !currentText.startsWith('.')) {
+      if (dispalyElement !== null) {
+        dispalyElement.style.display = "none"
+      }
       return
     }
     console.log('user typed ' + currentText)
@@ -58,17 +62,21 @@ const runSlackAutocompletion = async () => {
     console.log(matchesCount + " matches found")
 
     // Display lines that match
-    let dispalyElement: HTMLDivElement | null = document.querySelector("div.lg-chatopshelp-suggestions")
     if (dispalyElement === null) {
       dispalyElement = createDisplayElement(dispalyElement)
     } else {
       dispalyElement.innerHTML = ""
+      dispalyElement.style.display = "block"
     }
 
     for (let line in matches) {
       let li = document.createElement("li")
+      li.className = 'p-channel_sidebar__channel'
+      li.style.whiteSpace = "nowrap"
+      li.style.display = ""
       li.innerText = matches[line]
       dispalyElement.appendChild(li)
+
     }
   })
 }
@@ -78,13 +86,14 @@ runSlackAutocompletion()
 
 function createDisplayElement(dispalyElement: HTMLDivElement | null) {
   dispalyElement = document.createElement("div")
+  dispalyElement.style.display = "block"
   dispalyElement.className = "lg-chatopshelp-suggestions"
   // move element to top right
   dispalyElement.style.position = "absolute"
   dispalyElement.style.right = "0"
   dispalyElement.style.top = "0"
   dispalyElement.style.zIndex = "9999"
-  dispalyElement.style.width = "300px"
+  dispalyElement.style.width = "800px"
   dispalyElement.style.height = "300px"
   dispalyElement.style.backgroundColor = "grey"
   dispalyElement.style.border = "1px solid black"
